@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,7 +64,7 @@ class BeerControllerTest {
     BeerDto savedDto = new BeerDto(UUID.randomUUID(), "New Beer", BEER_STYLE, BEER_UPC);
     String beerDtoJson = objectMapper.writeValueAsString(beerDto);
 
-    given(beerService.saveNewBeer(any())).willReturn(savedDto);
+    given(beerService.saveNewBeer(eq(beerDto))).willReturn(savedDto);
 
     mockMvc.perform(post("/api/v1/beer/")
         .contentType(MediaType.APPLICATION_JSON)
@@ -81,7 +82,7 @@ class BeerControllerTest {
         .content(beerDtoJson))
         .andExpect(status().isNoContent());
 
-    then(beerService).should().updateBeer(any(), any());
+    then(beerService).should().updateBeer(eq(BEER_ID), eq(VALID_BEER));
 
   }
 }
