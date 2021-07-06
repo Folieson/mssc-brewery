@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -34,6 +35,7 @@ class BeerControllerTest {
   private static final String BEER_STYLE = "PALE_ALE";
   private static final long BEER_UPC = 123456789012L;
   private static final BeerDto VALID_BEER = new BeerDto(BEER_ID, BEER_NAME, BEER_STYLE, BEER_UPC);
+  private static final String URL = "/api/v1/beer/";
 
   @MockBean
   private BeerService beerService;
@@ -51,7 +53,7 @@ class BeerControllerTest {
   void getBeer() throws Exception {
     given(beerService.getBeerById(any(UUID.class))).willReturn(VALID_BEER);
 
-    mockMvc.perform(get("/api/v1/beer/" + BEER_ID).accept(MediaType.APPLICATION_JSON))
+    mockMvc.perform(get(URL + BEER_ID).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(BEER_ID.toString())))
         .andExpect(jsonPath("$.beerName", is(BEER_NAME)));
@@ -66,7 +68,7 @@ class BeerControllerTest {
 
     given(beerService.saveNewBeer(eq(beerDto))).willReturn(savedDto);
 
-    mockMvc.perform(post("/api/v1/beer/")
+    mockMvc.perform(post(URL)
         .contentType(MediaType.APPLICATION_JSON)
         .content(beerDtoJson))
         .andExpect(status().isCreated());
@@ -76,13 +78,19 @@ class BeerControllerTest {
   void handleUpdate() throws Exception {
     String beerDtoJson = objectMapper.writeValueAsString(VALID_BEER);
 
-    //when
-    mockMvc.perform(put("/api/v1/beer/" + BEER_ID)
+    mockMvc.perform(put(URL + BEER_ID)
         .contentType(MediaType.APPLICATION_JSON)
         .content(beerDtoJson))
         .andExpect(status().isNoContent());
 
     then(beerService).should().updateBeer(eq(BEER_ID), eq(VALID_BEER));
+  }
 
+  @Test
+  void deleteBeer() throws Exception {
+    mockMvc.perform(delete(URL + BEER_ID)
+        .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+    then(beerService).should().deleteBeerById(BEER_ID);
   }
 }
