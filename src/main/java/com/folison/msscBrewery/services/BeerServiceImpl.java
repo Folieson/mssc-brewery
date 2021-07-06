@@ -16,4 +16,9 @@ public class BeerServiceImpl implements BeerService {
   public BeerDto saveNewBeer(BeerDto beerDto) {
     return new BeerDto(UUID.randomUUID(), "Foo", "Bar", 321L);
   }
+
+  @Override
+  public void updateBeer(UUID beerId, BeerDto beerDto) {
+    //TODO: impl - would add a real ipl to update beer
+  }
 }
