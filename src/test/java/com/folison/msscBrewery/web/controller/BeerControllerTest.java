@@ -3,6 +3,7 @@ package com.folison.msscBrewery.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folison.msscBrewery.services.BeerService;
 import com.folison.msscBrewery.web.model.BeerDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,8 @@ class BeerControllerTest {
   private static final String BEER_NAME = "Beer1";
   private static final String BEER_STYLE = "PALE_ALE";
   private static final long BEER_UPC = 123456789012L;
-  private static final BeerDto VALID_BEER = new BeerDto(BEER_ID, BEER_NAME, BEER_STYLE, BEER_UPC);
   private static final String URL = "/api/v1/beer/";
+  private BeerDto validBeer;
 
   @MockBean
   private BeerService beerService;
@@ -46,9 +47,14 @@ class BeerControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @BeforeEach
+  void setUp() {
+   validBeer = new BeerDto(BEER_ID, BEER_NAME, BEER_STYLE, BEER_UPC);
+  }
+
   @Test
   void getBeer() throws Exception {
-    given(beerService.getBeerById(any(UUID.class))).willReturn(VALID_BEER);
+    given(beerService.getBeerById(any(UUID.class))).willReturn(validBeer);
 
     mockMvc.perform(get(URL + BEER_ID).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -71,12 +77,12 @@ class BeerControllerTest {
 
   @Test
   void handleUpdate() throws Exception {
-    String beerDtoJson = objectMapper.writeValueAsString(VALID_BEER);
-
+    validBeer.setId(null);
+    String beerDtoJson = objectMapper.writeValueAsString(validBeer);
     mockMvc.perform(put(URL + BEER_ID).contentType(MediaType.APPLICATION_JSON).content(beerDtoJson))
         .andExpect(status().isNoContent());
 
-    then(beerService).should().updateBeer(eq(BEER_ID), eq(VALID_BEER));
+    then(beerService).should().updateBeer(eq(BEER_ID), eq(validBeer));
   }
 
   @Test
