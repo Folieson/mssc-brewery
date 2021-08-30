@@ -3,6 +3,7 @@ package com.folison.msscBrewery.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folison.msscBrewery.services.CustomerService;
 import com.folison.msscBrewery.web.model.CustomerDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,8 @@ class CustomerControllerTest {
 
   private static final UUID CUSTOMER_ID = UUID.randomUUID();
   private static final String CUSTOMER_NAME = "John";
-  private static final CustomerDto VALID_CUSTOMER = new CustomerDto(CUSTOMER_ID, CUSTOMER_NAME);
   private static final String URL = "/api/v1/customer/";
+  private CustomerDto validCustomer;
 
   @MockBean
   private CustomerService customerService;
@@ -44,9 +45,14 @@ class CustomerControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @BeforeEach
+  void setUp() {
+    validCustomer = new CustomerDto(CUSTOMER_ID, CUSTOMER_NAME);
+  }
+
   @Test
   void getCustomer() throws Exception {
-    given(customerService.getCustomerById(any(UUID.class))).willReturn(VALID_CUSTOMER);
+    given(customerService.getCustomerById(any(UUID.class))).willReturn(validCustomer);
 
     mockMvc.perform(get(URL + CUSTOMER_ID).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -69,12 +75,13 @@ class CustomerControllerTest {
 
   @Test
   void handleUpdate() throws Exception {
-    String customerDtoJson = objectMapper.writeValueAsString(VALID_CUSTOMER);
+    validCustomer.setId(null);
+    String customerDtoJson = objectMapper.writeValueAsString(validCustomer);
 
     mockMvc.perform(put(URL + CUSTOMER_ID).contentType(MediaType.APPLICATION_JSON).content(customerDtoJson))
         .andExpect(status().isNoContent());
 
-    then(customerService).should().updateCustomer(eq(CUSTOMER_ID), eq(VALID_CUSTOMER));
+    then(customerService).should().updateCustomer(eq(CUSTOMER_ID), eq(validCustomer));
   }
 
   @Test
