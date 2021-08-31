@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RequestMapping("/api/v1/beer")
 @RestController
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 public class BeerController {
   private final BeerService beerService;
 
